@@ -236,6 +236,8 @@ local function textFormat(text,width)
 		end
 		i = i + 1
 	end
+	str = str .. word
+	textArray[r] = str
 	return textArray
 end
 --функции

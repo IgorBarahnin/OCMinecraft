@@ -1070,10 +1070,10 @@ local function drawSideMenu()
 		for i in pairs(squad[battle.partyMemberTurn].abilities) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squad[battle.partyMemberTurn].abilities[i]].name)
-			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown),13+5*i,0x000000,("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown))
+			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown))
 			local description = textFormat(abilities[squad[battle.partyMemberTurn].abilities[i]].description,windows.sideMenuWindow.width)
 			for r in pairs(description) do
-				buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1)+r,0x000000,description[r])
+				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
 			end
 		end
 	end

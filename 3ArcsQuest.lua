@@ -642,7 +642,7 @@ local function addSquadMember(name,hp,parameters,equipment,imagePath)
 	table.insert(squad,{
 		name = name,
 		hp = hp,
-		couldown = 0,
+		couldown = 5,
 		abilities = {1,2},
 		parameters = {
 			strength = parameters[1],
@@ -1086,19 +1086,19 @@ local function drawSideMenu()
 	elseif selectedMenu == 3 then
 		-- меню боя
 		local squadMember = squad[battle.partyMemberTurn]
-		buffer.square(windows.sideMenuWindow.x+2,14,windows.sideMenuWindow.width    ,1,0xFF0000)
-		buffer.square(windows.sideMenuWindow.x+2,14,windows.sideMenuWindow.width/2  ,1,0x00FF00)
-		buffer.square(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2,14,1,1,0xFFFF00)
+		buffer.square(           windows.sideMenuWindow.x+2                                ,14,           windows.sideMenuWindow.width     ,1,0xFF0000)
+		buffer.square(           windows.sideMenuWindow.x+2                                ,14,math.floor(windows.sideMenuWindow.width/2)  ,1,0x00FF00)
+		buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2),14,1                                           ,1,0xFFFF00)
 		if squadMember.couldown >  0 then
-			buffer.square(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32),14,(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32),1,0xFFFFFF)
-			buffer.text(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2+windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2,14,0x330000,squadMember.couldown)
+			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)      ),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)),1,0xFFFFFF)
+			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2+windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x330000,squadMember.couldown)
 		end
 		if squadMember.couldown <  0 then
-			buffer.square(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                            ,14,(windows.sideMenuWindow.width/2)*(squadMember.couldown/-32),1,0xFFFFFF)
-			buffer.text(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2,14,0x003300,string.sub(tostring(squadMember.couldown),2)
+			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                  ),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/-32)),1,0xFFFFFF)
+			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x003300,string.sub(tostring(squadMember.couldown),2))
 		end
 		if squadMember.couldown == 0 then
-			buffer.text(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2,14,0x000000,"0")
+			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                  ),14,0x000000,"0")
 		end
 	elseif selectedMenu == 4 then
 		-- меню магии

@@ -745,7 +745,7 @@ local function addSquadMember(name,hp,parameters,equipment,imagePath)
 		squadImage = image.load(imagePath),
 	})
 	for i in pairs(squad) do
-		calculateAllCharacteristics(squad[i].parameters,squad[i].equipment)
+		calculateAllCharacteristics(squad[i].parameters,squad[i].equipment,squad[i].modifiers)
 	end
 	selectedSquadMember = 1
 end
@@ -1274,7 +1274,7 @@ local function mainInput()
 					end
 					inventory[i].count=inventory[i].count-1
 					if inventory[i].count<1 then table.remove(inventory,i) end
-					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment)
+					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
 			end
 		elseif selectedMenu == 1 then
@@ -1303,7 +1303,7 @@ local function mainInput()
 					squadMember.equipment.ring = nil
 				end
 			end
-			calculateAllCharacteristics(squadMember.parameters,squadMember.equipment)
+			calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 		elseif selectedMenu == 2 then
 			for i in pairs(squad) do
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,13+(i-1)*8,buffer.screen.width-windows.sideMenuWindow.x,8}) then
@@ -1521,7 +1521,7 @@ player.equipment.weapon = itemCategories.weapons[1]
 table.insert(player.abilities,3)
 table.insert(player.abilities,4)
 
-calculateAllCharacteristics(player.parameters,player.equipment)
+calculateAllCharacteristics(player.parameters,player.equipment,player.modifiers)
 
 -- запуск игры--
 mainLoop()

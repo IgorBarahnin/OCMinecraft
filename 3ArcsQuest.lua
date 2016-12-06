@@ -1106,6 +1106,7 @@ local function mainInput()
 			if clicked(e[3], e[4], buttons[i].square) and buttons[i].condition() then
 				buttons[i].press = 1
 				buttons[i].func(buttons[i].arguments)
+				return
 			end
 		end
 		if     selectedMenu == 0 then

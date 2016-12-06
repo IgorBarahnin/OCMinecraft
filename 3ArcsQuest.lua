@@ -563,7 +563,7 @@ local player = {
 	yDraw = 0,
 	name = "Маритур",
 	hp=0,
-	couldown = 0,
+	couldown = 5,
 	abilities = {1,2},
 	parameters = {
 		strength = 16,
@@ -768,6 +768,7 @@ local function battleStart(enemys)
 	battle.gold = 0
 	battleQueue = {}
 	battle.selectedEnemysNum = {}
+	menuLock = false
 	inBattle = true
 	battleLogAddMesage(squad[battle.partyMemberTurn].name .. " turn")
 	battleLogInsertInDialog()
@@ -784,8 +785,13 @@ local function battleTurn()
 			battle.gold       = math.floor(enemysInBattle[i].gold      *(math.random(1000,1200)/1100))
 			battle.experience = math.floor(enemysInBattle[i].experience*(math.random(1000,1200)/1100))
 			table.remove(enemysInBattle,i)
+			enemyCount=enemyCount-1
 			i=i-1
 		end
+	end
+	for i in pairs(squad) do
+		if squad[i].couldown > 0 then squad[i].couldown = squad[i].couldown - 1 end
+		if squad[i].couldown < 0 then squad[i].couldown = squad[i].couldown + 1 end
 	end
 	battleQueue = {}
 	battle.selectedEnemysNum = {}
@@ -823,7 +829,9 @@ local function nextMemberTurn()
 end
 
 local function battleFinish(rewards, experience)
+	selectedMenu = 0
 	inBattle = false
+	menuLock = false
 end
 
 ------------------------
@@ -870,6 +878,7 @@ local function drawEnemys()
 		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,64,1,0xFFFFFF)
 		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,math.floor(64*(enemysInBattle[i].hp/enemysInBattle[i].parameters.health)),1,0xFF0000)
 	end
+	
 	if battle.inAttack then 
 		local i = battle.selecter
 		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,64,32,0xEEEEEE)
@@ -1076,7 +1085,21 @@ local function drawSideMenu()
 		end
 	elseif selectedMenu == 3 then
 		-- меню боя
-	
+		local squadMember = squad[battle.partyMemberTurn]
+		buffer.square(windows.sideMenuWindow.x+2,14,windows.sideMenuWindow.width    ,1,0xFF0000)
+		buffer.square(windows.sideMenuWindow.x+2,14,windows.sideMenuWindow.width/2  ,1,0x00FF00)
+		buffer.square(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2,14,1,1,0xFFFF00)
+		if squadMember.couldown >  0 then
+			buffer.square(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32),14,(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32),1,0xFFFFFF)
+			buffer.text(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2+windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2,14,0x330000,squadMember.couldown)
+		end
+		if squadMember.couldown <  0 then
+			buffer.square(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                            ,14,(windows.sideMenuWindow.width/2)*(squadMember.couldown/-32),1,0xFFFFFF)
+			buffer.text(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2,14,0x003300,string.sub(tostring(squadMember.couldown),2)
+		end
+		if squadMember.couldown == 0 then
+			buffer.text(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2,14,0x000000,"0")
+		end
 	elseif selectedMenu == 4 then
 		-- меню магии
 		
@@ -1282,6 +1305,16 @@ local function powerAttack(attacker,targets,arguments)
 	end
 end
 createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,powerAttack,1,{})
+local function powerAttack(attacker,targets,arguments)
+	for i in pairs(targets) do
+		local dam = (getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage))
+		dam = dam - targets[i].parameters.armour
+		if dam <= 0 then dam = 1 end
+		targets[i].hp = targets[i].hp - dam
+		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
+	end
+end
+createAbilities("Fisting rain","Разбивает лица сразу трем противникам",3,powerAttack,2,{})
 
 -- функции элементов
 local function none(n) return true end

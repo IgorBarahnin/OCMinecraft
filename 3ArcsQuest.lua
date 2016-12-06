@@ -872,19 +872,19 @@ end
 local function drawEnemys()
 	for i in pairs(enemysInBattle) do
 		for r in pairs(battle.selectedEnemysNum) do
-			if battle.inAttack and battle.selectedEnemysNum[r] == i then buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,64,32,0xFFFFFF) end
+			if battle.inAttack and battle.selectedEnemysNum[r] == i then buffer.square(math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,64,32,0xFFFFFF) end
 		end
-		buffer.image ((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,enemysInBattle[i].image)
-		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,64,1,0xFFFFFF)
-		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,math.floor(64*(enemysInBattle[i].hp/enemysInBattle[i].parameters.health)),1,0xFF0000)
+		buffer.image (math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,enemysInBattle[i].image)
+		buffer.square(math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,64,1,0xFFFFFF)
+		buffer.square(math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,math.floor(64*(enemysInBattle[i].hp/enemysInBattle[i].parameters.health)),1,0xFF0000)
 	end
 	
 	if battle.inAttack then 
 		local i = battle.selecter
-		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,64,32,0xEEEEEE)
-		buffer.image ((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,enemysInBattle[i].image)
-		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,64,1 ,0xFFFFFF)
-		buffer.square((windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,math.floor(64*(enemysInBattle[i].hp/enemysInBattle[i].parameters.health)),1,0xFF0000)
+		buffer.square(math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,64,32,0xEEEEEE)
+		buffer.image (math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle-16,enemysInBattle[i].image)
+		buffer.square(math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,64,1 ,0xFFFFFF)
+		buffer.square(math.floor(windows.mainWindow.width/(enemyCount+1))*i-32,windows.mainWindow.yMiddle+16,math.floor(64*(enemysInBattle[i].hp/enemysInBattle[i].parameters.health)),1,0xFF0000)
 		
 		buffer.square(1,windows.dialogWindow.y-1,windows.sideMenuWindow.x                                                                       ,1,0xFFFFFF)
 		buffer.square(1,windows.dialogWindow.y-1,math.floor(windows.sideMenuWindow.x*(enemysInBattle[i].hp/enemysInBattle[i].parameters.health)),1,0xFF0000)
@@ -1087,7 +1087,7 @@ local function drawSideMenu()
 		-- меню боя
 		local squadMember = squad[battle.partyMemberTurn]
 		buffer.square(           windows.sideMenuWindow.x+2                                  ,14,           windows.sideMenuWindow.width     ,1,0xFF0000)
-		buffer.square(           windows.sideMenuWindow.x+2                                  ,14,math.floor(windows.sideMenuWindow.width/2)  ,1,0x00FF00)
+		buffer.square(           windows.sideMenuWindow.x+2                                  ,14,math.floor(windows.sideMenuWindow.width/2)-2,1,0x00FF00)
 		buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-2,14,1                                           ,1,0xFFFF00)
 		if squadMember.couldown >  0 then
 			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)      ),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)),1,0xFFFFFF)

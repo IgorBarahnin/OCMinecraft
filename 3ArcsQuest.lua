@@ -832,7 +832,7 @@ local function keysUsage(e)
 					if battle.selectedEnemysNum[i] == battle.selecter then selected = true end
 				end
 				if not selected then
-					table.insert(battle.selectedEnemys,{enemysInBattle[battle.selecter]})
+					table.insert(battle.selectedEnemys,enemysInBattle[battle.selecter])
 					table.insert(battle.selectedEnemysNum,battle.selecter) 
 					if getArraySize(battle.selectedEnemys) >= battle.selectedEnemysCount then nextMemberTurn() end 
 				end

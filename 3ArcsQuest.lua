@@ -321,8 +321,20 @@ local function getDammage(attack,defence,dammage)
 	return math.floor((dammage*(math.random(1000,1200)/1100))/(defence/attack))
 end
 
+local function getSpellDammage(intelligence,dammage)
+	return math.floor((dammage*(math.random(1000,1200)/1100))/(10/intelligence))
+end
+
+
 local function blockTest(accuracy,block)
 	return math.random(0,100)<(50*(accuracy/block))
+end
+
+local function setBaseParameters(object)
+	object.strength=object.baseStrength
+	object.agility =object.baseAgility
+	object.intelligence=object.baseIntelligence
+	object.willpower=object.baseWillpower
 end
 
 local function calculateSecondaryCharacteristics(object)
@@ -351,8 +363,29 @@ local function calculateEquipmentModifiers(object, equipment)
 	if equipment.weapon then calculateEquipmentModifier(object, equipment.weapon) end
 end
 
-local function calculateAllCharacteristics(object, equipment)
+local function calculatePrimaryParametersModifiers(object,modifiers)
+	for i in pairs(modifiers) do
+		object.strength    =object.strength    + modifiers[i].strength
+		object.agility     =object.agility     + modifiers[i].agility
+		object.intelligence=object.intelligence+ modifiers[i].intelligence
+		object.willpower   =object.willpower   + modifiers[i].willpower
+	end
+end
+
+local function calculateSecondaryParametersModifiers(object,modifiers)
+	for i in pairs(modifiers) do
+		object.attack  =object.attack   + modifiers[i].attack
+		object.defence =object.defence  + modifiers[i].defence
+		object.accuracy=object.accuracy + modifiers[i].accuracy
+		object.block   =object.block    + modifiers[i].block
+	end
+end
+
+local function calculateAllCharacteristics(object, equipment, modifiers)
+	setBaseParameters(object)
+	calculatePrimaryParametersModifiers(object,modifiers)
 	calculateSecondaryCharacteristics(object)
+	calculateSecondaryParametersModifiers(object,modifiers)
 	calculateEquipmentModifiers(object, equipment)
 end
 
@@ -370,35 +403,67 @@ local function battleLogInsertInDialog()
 		dialog.text = dialog.text .. battleLog[i] .. "/"
 	end
 end
+-- модификаторы
+local modifiers = {}
+local function createModifiers(s,a,i,w,at,bl,ac,de,hea)
+	strength = s,
+	agility = a,
+	intelligence = i,
+	willpower = w,
+	
+	attack = at,
+	block = bl,
+	accuracy = ac,
+	defence = de,
+	
+	health = hea
+end
 
 -- умения
 local abilities = {}
-local function createAbilities(name,description,targets,func,couldown,arguments)
+local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,modifiers)
 	table.insert(abilities,{
 		name=name,
 		description=description,
 		targets=targets,
 		func=func,
 		couldown=couldown,
-		arguments=arguments
+		multiplier=multiplier,
+		armourIgnor=armourIgnor,
+		modifiers=modifiers
 	})
 end
 
-local function standartAttack(attacker,targets,arguments)
+-- магия
+local spells = {}
+local function createSpells(name,description,targets,func,willpower,dammage,armourIgnor,modifiers)
+	table.insert(spells,{
+		name=name,
+		description=description,
+		targets=targets,
+		func=func,
+		couldown=couldown,
+		multiplier=multiplier,
+		armourIgnor=armourIgnor,
+		modifiers=modifiers
+	})
+end
+
+local function standartAttack(attacker,targets,abilitie)
 	for i in pairs(targets) do
-		local dam = getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage)
-		dam = dam - targets[i].parameters.armour
-		if dam <= 0 then dam = 1 end
+		local dam = math.floor(getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage)*abilitie.multiplier)
+		if not abilitie.armourIgnor then dam = dam - targets[i].parameters.armour end
+		if dam < 0 then dam = 0 end
 		targets[i].hp = targets[i].hp - dam
 		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
 	end
 end
-createAbilities("Attack" ,"Standart attack" ,1,standartAttack,0,{})
-createAbilities("Defence","Standart defence",1,standartAttack,0,{})
+createAbilities("Attack" ,"Standart attack" ,1,standartAttack,0,1,{})
+createAbilities("Defence","Standart defence",1,standartAttack,0,1,{})
 
 -- враги --
 local enemys = {}
-local function createEnemy(name,hp,gold,experience,s,a,i,w,hea,arm,dam,imagePath,modifiers)
+local function createEnemy(name,hp,gold,experience,s,a,i,w,hea,arm,dam,imagePath)
 	table.insert(enemys,{
 		name = name,
 		hp = hp,
@@ -407,6 +472,11 @@ local function createEnemy(name,hp,gold,experience,s,a,i,w,hea,arm,dam,imagePath
 		couldown = 0,
 		abilities = {1,2},
 		parameters = {
+			baseStrength = s,
+			baseAgility = a,
+			baseIntelligence = i,
+			baseWillpower = w,
+		
 			strength = s,
 			agility = a,
 			intelligence = i,
@@ -421,16 +491,7 @@ local function createEnemy(name,hp,gold,experience,s,a,i,w,hea,arm,dam,imagePath
 			dammage= dam,
 			armour = arm
 		},
-		modifiers={
-			attack = modifiers[1],
-			block = modifiers[2],
-			accuracy = modifiers[3],
-			defence = modifiers[4],
-			
-			health = modifiers[5],
-			dammage= modifiers[6],
-			armour = modifiers[7]
-		},
+		modifiers={},
 		image = image.load(imagePath)
 	})
 end
@@ -565,7 +626,14 @@ local player = {
 	hp=0,
 	couldown = 5,
 	abilities = {1,2},
+	spells = {},
+	modifiers={},
 	parameters = {
+		baseStrength = 16,
+		baseAgility = 12,
+		baseIntelligence = 10,
+		baseWillpower = 11,
+		
 		strength = 16,
 		agility = 12,
 		intelligence = 10,
@@ -644,7 +712,14 @@ local function addSquadMember(name,hp,parameters,equipment,imagePath)
 		hp = hp,
 		couldown = 5,
 		abilities = {1,2},
+		spells = {},
+		modifiers={},
 		parameters = {
+			baseStrength = parameters[1],
+			baseAgility = parameters[2],
+			baseIntelligence = parameters[3],
+			baseWillpower = parameters[4],
+		
 			strength = parameters[1],
 			agility = parameters[2],
 			intelligence = parameters[3],
@@ -778,7 +853,7 @@ local function battleTurn()
 	for i in pairs(battleQueue) do
 		battleLogAddMesage("Attacker:" .. battleQueue[i].attacker.name)
 		battleQueue[i].attacker.couldown = battleQueue[i].attacker.couldown-battleQueue[i].ability.couldown
-		battleQueue[i].ability.func(battleQueue[i].attacker,battleQueue[i].targets,battleQueue[i].ability.arguments)
+		battleQueue[i].ability.func(battleQueue[i].attacker,battleQueue[i].targets,battleQueue[i].ability)
 	end
 	for i in pairs(enemysInBattle) do
 		if enemysInBattle[i].hp < 1 then
@@ -1090,20 +1165,20 @@ local function drawSideMenu()
 		buffer.square(           windows.sideMenuWindow.x+2                                  ,14,math.floor(windows.sideMenuWindow.width/2)-2,1,0x88FF88)
 		buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-2,14,1                                           ,1,0xFFFF88)
 		if squadMember.couldown >  0 then
-			buffer.square(math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)+string.len("COULDOWN")/2),13,string.len("COULDOWN"),1,0x336633)
+			buffer.square(math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,string.len("COULDOWN"),1,0x336633)
 			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)      ),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)),1,0x33FF33)
 			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x336633,           tostring(squadMember.couldown)   )
 		end
 		if squadMember.couldown <  0 then
-			buffer.square(math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)+string.len("COULDOWN")/2),13,string.len("COULDOWN"),1,0x663333)
+			buffer.square(math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,string.len("COULDOWN"),1,0x663333)
 			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                -2),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/-32)),1,0xFF3333)
 			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2+windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x663333,string.sub(tostring(squadMember.couldown),2))
 		end
 		if squadMember.couldown == 0 then
-			buffer.square(math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)+string.len("COULDOWN")/2),13,string.len("COULDOWN"),1,0x666633)
+			buffer.square(math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,string.len("COULDOWN"),1,0x666633)
 			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                )-2,14,0xFFFF00,"0")
 		end
-		buffer.text  (math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)+string.len("COULDOWN")/2),13,0x000000,"COULDOWN")
+		buffer.text (math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,0x000000,"COULDOWN")
 	elseif selectedMenu == 4 then
 		-- меню магии
 		
@@ -1300,26 +1375,11 @@ end
 ------------------- =====
 
 -- Создание способностей
-local function powerAttack(attacker,targets,arguments)
-	for i in pairs(targets) do
-		local dam = (getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage))*3
-		dam = dam - targets[i].parameters.armour
-		if dam <= 0 then dam = 1 end
-		targets[i].hp = targets[i].hp - dam
-		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
-	end
-end
-createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,powerAttack,5,{})
-local function powerAttack(attacker,targets,arguments)
-	for i in pairs(targets) do
-		local dam = (getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage))
-		dam = dam - targets[i].parameters.armour
-		if dam <= 0 then dam = 1 end
-		targets[i].hp = targets[i].hp - dam
-		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
-	end
-end
-createAbilities("Fisting rain","Разбивает лица сразу трем противникам",3,powerAttack,6,{})
+createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,powerAttack,5,3,{})
+createAbilities("Fisting rain","Разбивает лица сразу трем противникам",3,standartAttack,6,0.7,{})
+
+-- Создание магия
+createSpells   ("Power bolt","Магический болт!... болт...",3,powerBolt,6,3,false,{})
 
 -- функции элементов
 local function none(n) return true end
@@ -1400,8 +1460,9 @@ createButton({windows.sideMenuWindow.x                                          
 createButton({windows.sideMenuWindow.x                                                 +2,30+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "RUN"      , 0x000000, menuEquallyThree, battleFinish, { })
 
 -- гладим котиков
--- local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath,modifiers)
-createEnemy("slime",75,45,15,15,10,5,5,75,4,50,aBED .. "/slime.pic",{0,0,0,0,0,0,0})
+-- local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath)
+-- local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath)
+createEnemy("slime",75,45,15,15,10,5,5,75,4,50,aBED .. "/slime.pic")
 
 -- рисуем квадраты
 -- local function createEntity(x,y,imagePath,func)

@@ -777,7 +777,7 @@ end
 local function battleTurn()
 	for i in pairs(battleQueue) do
 		battleLogAddMesage("Attacker:" .. battleQueue[i].attacker.name)
-		battleQueue[i].attacker.couldown = battleQueue[i].attacker.couldown+battleQueue[i].ability.couldown
+		battleQueue[i].attacker.couldown = battleQueue[i].attacker.couldown-battleQueue[i].ability.couldown
 		battleQueue[i].ability.func(battleQueue[i].attacker,battleQueue[i].targets,battleQueue[i].ability.arguments)
 	end
 	for i in pairs(enemysInBattle) do
@@ -793,6 +793,7 @@ local function battleTurn()
 		if squad[i].couldown > 0 then squad[i].couldown = squad[i].couldown - 1 end
 		if squad[i].couldown < 0 then squad[i].couldown = squad[i].couldown + 1 end
 	end
+	menuLock = false
 	battleQueue = {}
 	battle.selectedEnemysNum = {}
 	battle.partyMemberTurn = 1
@@ -808,13 +809,12 @@ local function battleTurn()
 	battleLogAddMesage("Turn " .. battle.turn)
 	battleLogAddMesage(squad[battle.partyMemberTurn].name .. " turn")
 	battleLogInsertInDialog()
-	
 end
 
 local function nextMemberTurn()
 	addActionToBattleQueue(battle.ability,battle.attacker,battle.selectedEnemys)
 	battle.partyMemberTurn = battle.partyMemberTurn+1
-	if battle.partyMemberTurn >= getArraySize(squad) then battleTurn(); return end
+	if battle.partyMemberTurn > getArraySize(squad) then battleTurn(); return end
 	battle.side = 1
 	battle.selectedEnemysNum = {}
 	battle.selectedEnemys = {}
@@ -1274,9 +1274,10 @@ local function mainDraw()
 	buffer.text(32, 1, 0x000000,"renderTime: " .. math.doubleToString((os.clock() - frameRenderClock) * 1000, 2) .. " ms")
 	buffer.text(64, 1, 0x000000,"Key: "        .. keyCode)
 	--buffer.text(96, 1, 0x000000,"Dammage: " .. getDammage(7,7,167))
-	for i in pairs(battle.selectedEnemysNum) do
-		buffer.text(96, 1+i, 0x000000, battle.selectedEnemysNum[i] .. "  1")
-	end
+	--for i in pairs(battle.selectedEnemysNum) do
+	--	  buffer.text(96, 1+i, 0x000000, battle.selectedEnemysNum[i] .. "  1")
+	--end
+	buffer.text(64, 2, 0x000000, "menuLock: " .. tostring(menuLock))
 	-- отрисовка изменений --
 	buffer.draw()
 end
@@ -1304,7 +1305,7 @@ local function powerAttack(attacker,targets,arguments)
 		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
 	end
 end
-createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,powerAttack,1,{})
+createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,powerAttack,5,{})
 local function powerAttack(attacker,targets,arguments)
 	for i in pairs(targets) do
 		local dam = (getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage))
@@ -1314,7 +1315,7 @@ local function powerAttack(attacker,targets,arguments)
 		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
 	end
 end
-createAbilities("Fisting rain","Разбивает лица сразу трем противникам",3,powerAttack,2,{})
+createAbilities("Fisting rain","Разбивает лица сразу трем противникам",3,powerAttack,6,{})
 
 -- функции элементов
 local function none(n) return true end
@@ -1451,6 +1452,7 @@ putInInventory("Predmet8", itemCategories.other, 999)
 player.equipment.armour = itemCategories.armours[1]
 player.equipment.weapon = itemCategories.weapons[1]
 table.insert(player.abilities,3)
+table.insert(player.abilities,4)
 
 calculateAllCharacteristics(player.parameters,player.equipment)
 

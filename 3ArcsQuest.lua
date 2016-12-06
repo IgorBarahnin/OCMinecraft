@@ -286,6 +286,8 @@ local battle = {
 	ability=1,
 	selecter=1,
 	attacker=nil,
+	experience=0,
+	gold=0,
 	selectedEnemysNum={}
 }
 local battleQueue = {}
@@ -760,6 +762,8 @@ local function battleStart(enemys)
 	battle.ability = 1
 	battle.selecter = 1
 	battle.attacker = nil
+	battle.experience = 0
+	battle.gold = 0
 	battleQueue = {}
 	battle.selectedEnemysNum = {}
 	inBattle = true
@@ -773,7 +777,14 @@ local function battleTurn()
 		battleQueue[i].attacker.couldown = battleQueue[i].attacker.couldown+battleQueue[i].ability.couldown
 		battleQueue[i].ability.func(battleQueue[i].attacker,battleQueue[i].targets,battleQueue[i].ability.arguments)
 	end
-	
+	for i in pairs(enemysInBattle) do
+		if enemysInBattle[i].hp < 1 then
+			battle.gold       = math.floor(enemysInBattle[i].gold      *(math.random(1000,1200)/1100))
+			battle.experience = math.floor(enemysInBattle[i].experience*(math.random(1000,1200)/1100))
+			table.remove(enemysInBattle,i)
+			i=i-1
+		end
+	end
 	battleQueue = {}
 	battle.selectedEnemysNum = {}
 	battle.partyMemberTurn = 1
@@ -1104,6 +1115,17 @@ local function mainInput()
 		keysUsage(e[4])
 	end
 	if e[1] == "touch" then
+		if battle.inAttack then
+			for i in pairs(battle.selectedEnemysNum) do
+				if battle.selectedEnemysNum[i] == battle.selecter then selected = true end
+			end
+			if not selected then
+				table.insert(battle.selectedEnemys,enemysInBattle[battle.selecter])
+				table.insert(battle.selectedEnemysNum,battle.selecter) 
+				if getArraySize(battle.selectedEnemys) >= battle.selectedEnemysCount then nextMemberTurn() end 
+			end
+			return
+		end
 		for i in pairs(buttons) do
 			if clicked(e[3], e[4], buttons[i].square) and buttons[i].condition() then
 				buttons[i].press = 1
@@ -1328,18 +1350,18 @@ end
 
 -- шлепаем кнопки
 -- local function createButton(square,bgcolor,text,color,func)
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*0+2, 9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0x55DDDD, "ITEMS"    , 0x000000, none            , switchMenu, {0})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*1+2, 9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0xDD55DD, "EQUIP"    , 0x000000, none            , switchMenu, {1})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*2+2, 9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0xDDDD55, "SQUAD"    , 0x000000, none            , switchMenu, {2})
-createButton({windows.sideMenuWindow.x                                                 +2,14,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ATTACK"   , 0x000000, menuEquallyThree, useAbility, {1})
-createButton({windows.sideMenuWindow.x                                                 +2,18,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "DEFENCE"  , 0x000000, menuEquallyThree, useAbility, {2})
-createButton({windows.sideMenuWindow.x                                                 +2,22,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "MAGIC"    , 0x000000, menuEquallyThree, switchMenu, {4})
-createButton({windows.sideMenuWindow.x                                                 +2,26,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ABILITIES", 0x000000, menuEquallyThree, switchMenu, {5})
-createButton({windows.sideMenuWindow.x                                                 +2,30,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "RUN"      , 0x000000, menuEquallyThree, battleFinish, { })
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*0+2,   9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0x55DDDD, "ITEMS"    , 0x000000, none            , switchMenu  , {0})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*1+2,   9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0xDD55DD, "EQUIP"    , 0x000000, none            , switchMenu  , {1})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0xDDDD55, "SQUAD"    , 0x000000, none            , switchMenu  , {2})
+createButton({windows.sideMenuWindow.x                                                 +2,14+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ATTACK"   , 0x000000, menuEquallyThree, useAbility  , {1})
+createButton({windows.sideMenuWindow.x                                                 +2,18+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "DEFENCE"  , 0x000000, menuEquallyThree, useAbility  , {2})
+createButton({windows.sideMenuWindow.x                                                 +2,22+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "MAGIC"    , 0x000000, menuEquallyThree, switchMenu  , {4})
+createButton({windows.sideMenuWindow.x                                                 +2,26+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ABILITIES", 0x000000, menuEquallyThree, switchMenu  , {5})
+createButton({windows.sideMenuWindow.x                                                 +2,30+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "RUN"      , 0x000000, menuEquallyThree, battleFinish, { })
 
 -- гладим котиков
 -- local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath,modifiers)
-createEnemy("slime",15000,15,10,5,5,15000,4,50,aBED .. "/slime.pic",{0,0,0,0,0,0,0})
+createEnemy("slime",75,15,10,5,5,75,4,50,aBED .. "/slime.pic",{0,0,0,0,0,0,0})
 
 -- рисуем квадраты
 -- local function createEntity(x,y,imagePath,func)

@@ -1091,14 +1091,14 @@ local function drawSideMenu()
 		buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-2,14,1                                           ,1,0xFFFF00)
 		if squadMember.couldown >  0 then
 			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-(windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)      ),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/ 32)),1,0xFFFFFF)
-			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x00DD00,squadMember.couldown)
+			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2-windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x000000,tostring(squadMember.couldown))
 		end
 		if squadMember.couldown <  0 then
 			buffer.square(math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                  ),14,math.floor((windows.sideMenuWindow.width/2)*(squadMember.couldown/-32)),1,0xFFFFFF)
-			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2+windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0xDD0000,string.sub(tostring(squadMember.couldown),2))
+			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2+windows.sideMenuWindow.width/4-string.len(squadMember.couldown)/2),14,0x000000,string.sub(tostring(squadMember.couldown),2))
 		end
 		if squadMember.couldown == 0 then
-			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                  ),14,0x000000,"0")
+			buffer.text  (math.floor(windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2                                                                )-2,14,0x000000,"0")
 		end
 	elseif selectedMenu == 4 then
 		-- меню магии

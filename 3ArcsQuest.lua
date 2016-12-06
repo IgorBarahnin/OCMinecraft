@@ -406,17 +406,19 @@ end
 -- модификаторы
 local modifiers = {}
 local function createModifiers(s,a,i,w,at,bl,ac,de,hea)
-	strength = s,
-	agility = a,
-	intelligence = i,
-	willpower = w,
-	
-	attack = at,
-	block = bl,
-	accuracy = ac,
-	defence = de,
-	
-	health = hea
+	table.insert(modifiers,{
+		strength = s,
+		agility = a,
+		intelligence = i,
+		willpower = w,
+		
+		attack = at,
+		block = bl,
+		accuracy = ac,
+		defence = de,
+		
+		health = hea
+	})
 end
 
 -- умения

@@ -398,10 +398,12 @@ createAbilities("Defence","Standart defence",1,standartAttack,0,{})
 
 -- враги --
 local enemys = {}
-local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath,modifiers)
+local function createEnemy(name,hp,gold,experience,s,a,i,w,hea,arm,dam,imagePath,modifiers)
 	table.insert(enemys,{
 		name = name,
 		hp = hp,
+		gold = gold,
+		experience = experience,
 		couldown = 0,
 		abilities = {1,2},
 		parameters = {
@@ -1361,7 +1363,7 @@ createButton({windows.sideMenuWindow.x                                          
 
 -- гладим котиков
 -- local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath,modifiers)
-createEnemy("slime",75,15,10,5,5,75,4,50,aBED .. "/slime.pic",{0,0,0,0,0,0,0})
+createEnemy("slime",75,45,15,15,10,5,5,75,4,50,aBED .. "/slime.pic",{0,0,0,0,0,0,0})
 
 -- рисуем квадраты
 -- local function createEntity(x,y,imagePath,func)

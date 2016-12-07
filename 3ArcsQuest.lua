@@ -599,7 +599,7 @@ end
 -- работа с экиперовкой --
 local function dressEquipment(item, category, equipment)
 	if type(item) == "string" then item = itemFind(category, item) end
-	if takeFromInventory(item, category)
+	if takeFromInventory(item, category) then
 		if category == itemCategories.armours then equipment.armour = itemCategories.armours[item] end
 		if category == itemCategories.weapons then equipment.weapon = itemCategories.weapons[item] end
 		if category == itemCategories.rings   then equipment.ring   = itemCategories.rings  [item] end

@@ -1565,9 +1565,9 @@ createEntity(4*16,6*8,aED .. "/def.pic"  ,moveRound,{0},none       ,{}          
 -- modifiers.dammage  = modifiers[6] --
 -- modifiers.armour   = modifiers[7] --
 ---                                 ---
-itemCreator("Броня из хитина жука" ,"Сделанно из жуков с южного побережья Лиссона",true,itemCategories.armours,{0  ,0  ,12 ,0  ,150,0  ,65 },dressEquipment    ,{}            )
-itemCreator("Топор"                ,"Топор для рубки древесины... или врагов"     ,true,itemCategories.weapons,{0  ,0  ,0  ,0  ,0  ,15 ,0  },dressEquipment    ,{}            )
-itemCreator("Свиток силового болта","Топор для рубки древесины... или врагов"     ,true,itemCategories.scrolls,nil                          ,addSpellFromScroll,{"Power bolt"})
+itemCreator("Броня из хитина жука" ,"Сделанно из жуков с южного побережья Лиссона",itemCategories.armours,true,{0  ,0  ,12 ,0  ,150,0  ,65 },dressEquipment    ,{}            )
+itemCreator("Топор"                ,"Топор для рубки древесины... или врагов"     ,itemCategories.weapons,true,{0  ,0  ,0  ,0  ,0  ,15 ,0  },dressEquipment    ,{}            )
+itemCreator("Свиток силового болта","Топор для рубки древесины... или врагов"     ,itemCategories.scrolls,true,nil                          ,addSpellFromScroll,{"Power bolt"})
 
 -- нанимаем анимешных тян в группу 
 --local function addSquadMember(name,hp,parameters,equipment,imagePath)

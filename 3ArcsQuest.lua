@@ -563,7 +563,7 @@ local function itemFind(category,name)
 	for i in pairs(category) do
 		if category[i].name == name then return i end 
 	end
-	error("Some shit happened! Предмет " .. name .. " не существует в категории" render(category))
+	error("Some shit happened! Предмет " .. name .. " не существует")
 end
 
 -- инвентарь --

@@ -585,12 +585,13 @@ local function takeFromInventory(item, category, count)
 	if not count then count = 1 end
 	for i in pairs(inventory) do
 		if inventory[i].num == item then
-		if inventory[i].count >= count then
-			inventory[i].count = inventory[i].count - count
-			if inventory[i].count <= 0 then
-				table.remove(inventory,i)
+			if inventory[i].count >= count then
+				inventory[i].count = inventory[i].count - count
+				if inventory[i].count <= 0 then
+					table.remove(inventory,i)
+				end
+				return true
 			end
-			return true
 		end
 	end
 	return false
@@ -821,7 +822,7 @@ end
 -----------------------------
 
 -- добавляет заклинание в список -- 
-local function addSpell{spells,spellNum}
+local function addSpell(spells,spellNum)
 	for i in pairs(spells) do
 		if spells[i].num == spellNum then spells[i].count = spells[i].count + 1; return end
 	end

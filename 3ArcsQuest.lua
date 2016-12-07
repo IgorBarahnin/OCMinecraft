@@ -460,18 +460,6 @@ local function createAbilities(name,description,targets,func,couldown,multiplier
 	})
 end
 
--- магия
-local spells = {}
-local function createSpells(name,description,cost,abilitie)
-	abilitie = getTableNumberByName(abilities, abilitie)
-	table.insert(spells,{
-		name=name,
-		description=description,
-		cost=cost,
-		abilitie=abilitie
-	})
-end
-
 local function standartAttack(attacker,targets,abilitie)
 	for i in pairs(targets) do
 		local dam = 0
@@ -528,7 +516,7 @@ local function createBattleEnemy(name)
 end
 
 --------------
--- ПРЕДМЕТЫ --
+-- ПРЕДМЕТЫ -- 
 
 -- категории предметов --
 local itemCategories = {
@@ -540,7 +528,10 @@ local itemCategories = {
 	scrolls = {},
 	other   = {}
 }
-local function itemCreator(category,name,modifiers,func,canUse,oneUse,description)
+local function itemCreator(name,description,category,oneUse,modifiers,func,arguments)
+	if not func      then func      = none                          end
+	if not arguments then arguments = {}                            end
+	if not modifiers then modifiers = {nil,nil,nil,nil,nil,nil,nil} end
 	table.insert(category,{
 		name=name,
 		modifiers={
@@ -556,7 +547,8 @@ local function itemCreator(category,name,modifiers,func,canUse,oneUse,descriptio
 		description=description,
 		canUse=canUse,
 		oneUse=oneUse,
-		func=func
+		func=func,
+		arguments=arguments
 	})
 end
 local function itemFind(category,name)
@@ -598,17 +590,63 @@ local function takeFromInventory(item, category, count)
 end
 
 -- работа с экиперовкой --
-local function dressEquipment(item, category, equipment)
-	if type(item) == "string" then item = itemFind(category, item) end
+local function dressEquipment(item, object, category)
+	if type(item) == "string" then item = category[itemFind(category, item)] end
+	if type(item) == "number" then item = category[item]                     end
 	if takeFromInventory(item, category) then
-		if category == itemCategories.armours then equipment.armour = itemCategories.armours[item] end
-		if category == itemCategories.weapons then equipment.weapon = itemCategories.weapons[item] end
-		if category == itemCategories.rings   then equipment.ring   = itemCategories.rings  [item] end
-		if category == itemCategories.shields then equipment.shield = itemCategories.shields[item] end
+		if category == itemCategories.armours then if not object.equipment.armour then object.equipment.armour = item; return true end end
+		if category == itemCategories.weapons then if not object.equipment.weapon then object.equipment.weapon = item; return true end end
+		if category == itemCategories.rings   then if not object.equipment.ring   then object.equipment.ring   = item; return true end end
+		if category == itemCategories.shields then if not object.equipment.shield then object.equipment.shield = item; return true end end
+	end
+	return false
+end
+
+------------------------
+-- "КНИГА ЗАКЛИНАНИЙ" --
+
+-- магия
+local spells = {}
+local function createSpells(name,description,cost,abilitie)
+	abilitie = getTableNumberByName(abilities, abilitie)
+	table.insert(spells,{
+		name       =name       ,
+		description=description,
+		cost       =cost       ,
+		abilitie   =abilitie
+	})
+end
+
+-- добавляет заклинание в список -- 
+local function addSpell(object,spellNum,count)
+	if not count then count = 1 end
+	for i in pairs(object.spells) do
+		if object.spells[i].num == spellNum then object.spells[i].count = object.spells[i].count + count; return end
+	end
+	table.insert(object.spells,{
+		num = spellNum,
+		count = count
+	})
+end
+
+-- добавить заклинание из свитка --
+local function addSpellFromScroll(item, object, category)
+	if not category                        then category          = itemCategories.scrolls                           end
+	if type(item) == "string"              then item              = category[itemFind(category, item)]               end
+	if type(item) == "number"              then item              = category[item]                                   end
+	if type(item.arguments[1]) == "string" then item.arguments[1] =  getTableNumberByName(spells, item.arguments[1]) end
+	local willpower = object.parameters.willpower
+	for i in pairs(object.spells) do
+		willpower = willpower - spells[object.spells[i]].cost
+	end
+	if willpower >= spells[item.arguments[1]].cost then
+		addSpell(object,item.arguments[1])
 		return true
 	end
 	return false
 end
+
+
 
 ----------------------------------
 -- СТРУКТУРЫ АКТИВНЫХ ЭЛЕМЕНТОВ --
@@ -820,17 +858,6 @@ end
 -----------------------------
 -- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ --
 -----------------------------
-
--- добавляет заклинание в список -- 
-local function addSpell(spells,spellNum)
-	for i in pairs(spells) do
-		if spells[i].num == spellNum then spells[i].count = spells[i].count + 1; return end
-	end
-	table.insert(spells,{
-		num = spellNum,
-		count = 1
-	})
-end
 
 -- функция возврвщает противника по имени --
 local function getEnemy(name)
@@ -1310,40 +1337,8 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
-					--[[
-					if inventory[i].category == itemCategories.armours then 
-						if squadMember.equipment.armour then
-							putInInventory(squadMember.equipment.armour.name,itemCategories.armours)
-							squadMember.equipment.armour = nil
-						end
-						squadMember.equipment.armour=itemCategories.armours[itemFind(itemCategories.armours,inventory[i].name)]
-					end
-					if inventory[i].category == itemCategories.weapons then 
-						if squadMember.equipment.weapon then
-							putInInventory(squadMember.equipment.weapon.name,itemCategories.weapons)
-							squadMember.equipment.weapon = nil
-						end
-						squadMember.equipment.weapon=itemCategories.weapons[itemFind(itemCategories.weapons,inventory[i].name)]
-					end
-					if inventory[i].category == itemCategories.rings then 
-						if squadMember.equipment.ring then
-							putInInventory(squadMember.equipment.ring.name,itemCategories.rings)
-							squadMember.equipment.ring = nil
-						end
-						squadMember.equipment.ring=itemCategories.rings[itemFind(itemCategories.rings,inventory[i].name)]
-					end
-					if inventory[i].category == itemCategories.shields then 
-						if squadMember.equipment.shield then
-							putInInventory(squadMember.equipment.shield.name,itemCategories.shields)
-							squadMember.equipment.shield = nil
-						end
-						squadMember.equipment.shield=itemCategories.shields[itemFind(itemCategories.shields,inventory[i].name)]
-					end
-					inventory[i].count=inventory[i].count-1
-					if inventory[i].count<1 then table.remove(inventory,i) end
-					]]--
-					
-					dressEquipment(inventory[i].num, inventory[i].category, squadMember.equipment)
+					inventory[i].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category)
+					if inventory[i].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
 			end
@@ -1552,7 +1547,7 @@ createEntity(4*16,4*8,aED .. "/def.pic"  ,none     ,{0},none       ,{}          
 createEntity(4*16,6*8,aED .. "/def.pic"  ,moveRound,{0},none       ,{}                       ,false)
 
 -- создаем легендарную адамантовую плиту усыпаную гранеными камнями и с изображением дворфа жующего мыло
--- local function itemCreator(category,name,modifiers,func,canUse,oneUse,description)
+-- local function itemCreator(name,description,category,oneUse,modifiers,func,arguments)
 ---                                 ---
 -- itemCategories.armours            --
 -- itemCategories.weapons            --
@@ -1570,30 +1565,16 @@ createEntity(4*16,6*8,aED .. "/def.pic"  ,moveRound,{0},none       ,{}          
 -- modifiers.dammage  = modifiers[6] --
 -- modifiers.armour   = modifiers[7] --
 ---                                 ---
-itemCreator(itemCategories.armours,"Броня из хитина жука",{0,0,12,0,1500,0 ,65},none,false,false,"Сделанно из жуков с южного побережья Лиссона")
-itemCreator(itemCategories.weapons,"Топор"               ,{0,0,0 ,0,0   ,15,0 },none,false,false,"Топор для рубки древесины... или врагов"     )
+itemCreator("Броня из хитина жука" ,"Сделанно из жуков с южного побережья Лиссона",true,itemCategories.armours,{0  ,0  ,12 ,0  ,150,0  ,65 },dressEquipment    ,{}            )
+itemCreator("Топор"                ,"Топор для рубки древесины... или врагов"     ,true,itemCategories.weapons,{0  ,0  ,0  ,0  ,0  ,15 ,0  },dressEquipment    ,{}            )
+itemCreator("Свиток силового болта","Топор для рубки древесины... или врагов"     ,true,itemCategories.scrolls,nil                          ,addSpellFromScroll,{"Power bolt"})
 
 -- нанимаем анимешных тян в группу 
 --local function addSquadMember(name,hp,parameters,equipment,imagePath)
 addSquadMember("Лин",15000,{10,10,15,15},{nil,nil,nil,nil},aSD .. "/Lin.pic")
 
--- получаем посылку с почты
-local i = 120
-while i > 0 do
-	putInInventory("Predmet1", itemCategories.other)
-	i = i - 1
-end
-putInInventory("Predmet7", itemCategories.other)
-putInInventory("Predmet5", itemCategories.other)
-putInInventory("Predmet5", itemCategories.other)
-putInInventory("Predmet6", itemCategories.other)
-putInInventory("Predmet2", itemCategories.other)
-putInInventory("Predmet3", itemCategories.other)
-putInInventory("Predmet4", itemCategories.other)
-putInInventory("Predmet4", itemCategories.other)
-putInInventory("Predmet4", itemCategories.other)
-putInInventory("Predmet8", itemCategories.other, 999)
-putInInventory("Predmet8", itemCategories.other, 999)
+-- наполняем карманы коксом --
+putInInventory("Свиток силового болта",itemCategories.scrolls)
 
 player.equipment.armour = itemCategories.armours[1]
 player.equipment.weapon = itemCategories.weapons[1]

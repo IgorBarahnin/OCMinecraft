@@ -569,7 +569,7 @@ end
 -- инвентарь --
 local inventory = {}
 local function putInInventory(item, category, count)
-	if type(item) == "string" then item == itemFind(category, item) end
+	if type(item) == "string" then item = itemFind(category, item) end
 	if not count then count = 1 end
 	for i in pairs(inventory) do
 		if inventory[i].num == item then inventory[i].count = inventory[i].count + count; return end
@@ -581,7 +581,7 @@ local function putInInventory(item, category, count)
 	})
 end
 local function takeFromInventory(item, category, count)
-	if type(item) == "string" then item == itemFind(category, item) end
+	if type(item) == "string" then item = itemFind(category, item) end
 	if not count then count = 1 end
 	for i in pairs(inventory) do
 		if inventory[i].num == item then
@@ -598,7 +598,7 @@ end
 
 -- работа с экиперовкой --
 local function dressEquipment(item, category, equipment)
-	if type(item) == "string" then item == itemFind(category, item) end
+	if type(item) == "string" then item = itemFind(category, item) end
 	if takeFromInventory(item, category)
 		if category == itemCategories.armours then equipment.armour = itemCategories.armours[item] end
 		if category == itemCategories.weapons then equipment.weapon = itemCategories.weapons[item] end

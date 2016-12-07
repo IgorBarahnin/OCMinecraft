@@ -27,6 +27,16 @@ local function deepcopy(orig)
     return copy
 end
 
+-- функция по поиску номера элемента таблицы по имени --
+local function getTableNumberByName(array,name)
+	for i in pairs(array) do
+		if array[i].name == name then return i end
+	end
+end
+
+-- костыль, наверное...
+local function none(n) return true end
+
 -- размер массива --
 local function getArraySize(array)
 	local r = 0
@@ -405,25 +415,37 @@ local function battleLogInsertInDialog()
 end
 -- модификаторы
 local modifiers = {}
-local function createModifiers(s,a,i,w,at,bl,ac,de,hea)
+local function createModifiers(name,description,symbol,parameters)
 	table.insert(modifiers,{
-		strength = s,
-		agility = a,
-		intelligence = i,
-		willpower = w,
-		
-		attack = at,
-		block = bl,
-		accuracy = ac,
-		defence = de,
-		
-		health = hea
+		name=name,
+		description=description,
+		symbol = {
+			letter=symbol[1],
+			fColor=symbol[2],
+			bColor=symbol[3],
+		},
+		parameters = {
+			strength = parameters[1],
+			agility = parameters[2],
+			intelligence = parameters[3],
+			willpower = parameters[4],
+			
+			attack = parameters[5],
+			block = parameters[6],
+			accuracy = parameters[7],
+			defence = parameters[8],
+			
+			health = parameters[9]
+		}
 	})
 end
 
 -- умения
 local abilities = {}
-local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,modifiers)
+local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
+	for i in pairs(modifiers) do
+		modifiers[i] = getTableNumberByName(modifiers[i])
+	end
 	table.insert(abilities,{
 		name=name,
 		description=description,
@@ -432,36 +454,38 @@ local function createAbilities(name,description,targets,func,couldown,multiplier
 		couldown=couldown,
 		multiplier=multiplier,
 		armourIgnor=armourIgnor,
+		magick=magick,
+		dammage=dammage,
 		modifiers=modifiers
 	})
 end
 
 -- магия
 local spells = {}
-local function createSpells(name,description,targets,func,willpower,dammage,armourIgnor,modifiers)
+local function createSpells(name,description,cost,abilitie)
+	abilitie = getTableNumberByName(abilitie)
 	table.insert(spells,{
 		name=name,
 		description=description,
-		targets=targets,
-		func=func,
-		couldown=couldown,
-		multiplier=multiplier,
-		armourIgnor=armourIgnor,
-		modifiers=modifiers
+		cost=cost,
+		abilitie=abilitie
 	})
 end
 
 local function standartAttack(attacker,targets,abilitie)
 	for i in pairs(targets) do
-		local dam = math.floor(getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage)*abilitie.multiplier)
+		local dam = 0
+		if not abilitie.magick then
+			dam = math.floor(getDammage(attacker.parameters.attack,targets[i].parameters.defence,attacker.parameters.dammage)*abilitie.multiplier)
+		else
+			dam = math.floor(getSpellDammage(attacker.parameters.intelligence,abilitie.dammage)*abilitie.multiplier)
+		end
 		if not abilitie.armourIgnor then dam = dam - targets[i].parameters.armour end
 		if dam < 0 then dam = 0 end
 		targets[i].hp = targets[i].hp - dam
 		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
 	end
 end
-createAbilities("Attack" ,"Standart attack" ,1,standartAttack,0,1,{})
-createAbilities("Defence","Standart defence",1,standartAttack,0,1,{})
 
 -- враги --
 local enemys = {}
@@ -506,21 +530,7 @@ end
 --------------
 -- ПРЕДМЕТЫ --
 
--- инвентарь --
-local inventory = {}
-local function putInInventory(name, category, count)
-	if not count then count = 1 end
-	for i in pairs(inventory) do
-		if inventory[i].name == name then inventory[i].count = inventory[i].count + count; return end
-	end
-	table.insert(inventory,{
-		name = name,
-		category = category,
-		count = count
-	})
-end
-
--- категории (жаль не типы, но type уже юзается) предметов --
+-- категории предметов --
 local itemCategories = {
 	armours = {},
 	weapons = {},
@@ -553,6 +563,50 @@ local function itemFind(category,name)
 	for i in pairs(category) do
 		if category[i].name == name then return i end 
 	end
+	error("Some shit happened! Предмет " .. name .. " не существует в категории" render(category))
+end
+
+-- инвентарь --
+local inventory = {}
+local function putInInventory(item, category, count)
+	if type(item) == "string" then item == itemFind(category, item) end
+	if not count then count = 1 end
+	for i in pairs(inventory) do
+		if inventory[i].num == item then inventory[i].count = inventory[i].count + count; return end
+	end
+	table.insert(inventory,{
+		num = num,
+		category = category,
+		count = count
+	})
+end
+local function takeFromInventory(item, category, count)
+	if type(item) == "string" then item == itemFind(category, item) end
+	if not count then count = 1 end
+	for i in pairs(inventory) do
+		if inventory[i].num == item then
+		if inventory[i].count >= count then
+			inventory[i].count = inventory[i].count - count
+			if inventory[i].count <= 0 then
+				table.remove(inventory,i)
+			end
+			return true
+		end
+	end
+	return false
+end
+
+-- работа с экиперовкой --
+local function dressEquipment(item, category, equipment)
+	if type(item) == "string" then item == itemFind(category, item) end
+	if takeFromInventory(item, category)
+		if category == itemCategories.armours then equipment.armour = itemCategories.armours[item] end
+		if category == itemCategories.weapons then equipment.weapon = itemCategories.weapons[item] end
+		if category == itemCategories.rings   then equipment.ring   = itemCategories.rings  [item] end
+		if category == itemCategories.shields then equipment.shield = itemCategories.shields[item] end
+		return true
+	end
+	return false
 end
 
 ----------------------------------
@@ -765,6 +819,17 @@ end
 -----------------------------
 -- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ --
 -----------------------------
+
+-- добавляет заклинание в список -- 
+local function addSpell{spells,spellNum}
+	for i in pairs(spells) do
+		if spells[i].num == spellNum then spells[i].count = spells[i].count + 1; return end
+	end
+	table.insert(spells,{
+		num = spellNum,
+		count = 1
+	})
+end
 
 -- функция возврвщает противника по имени --
 local function getEnemy(name)
@@ -1072,7 +1137,7 @@ local function drawSideMenu()
 			i = i + 1
 		end
 		for i in pairs(inventory) do
-			buffer.text(windows.sideMenuWindow.x+2,i+12,0x000000,inventory[i].name )
+			buffer.text(windows.sideMenuWindow.x+2,i+12,0x000000,inventory[i].category[inventory[i].num].name)
 			buffer.text((buffer.screen.width+1)-string.len(inventory[i].count),i+12,0x000000,inventory[i].count)
 		end
 	elseif selectedMenu == 1 then
@@ -1244,6 +1309,7 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
+					--[[
 					if inventory[i].category == itemCategories.armours then 
 						if squadMember.equipment.armour then
 							putInInventory(squadMember.equipment.armour.name,itemCategories.armours)
@@ -1274,6 +1340,9 @@ local function mainInput()
 					end
 					inventory[i].count=inventory[i].count-1
 					if inventory[i].count<1 then table.remove(inventory,i) end
+					]]--
+					
+					dressEquipment(inventory[i].num, inventory[i].category, squadMember.equipment)
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
 			end
@@ -1376,16 +1445,25 @@ end
 -- ИНИЦИАЛИЗАЦИЯ -- ==  ==
 ------------------- =====
 
+-- создание модификаторов
+-- local function createModifiers(name,description           ,{l,f,b},{s  ,a  ,i  ,w  ,at ,bl ,ac ,de ,hea})
+createModifiers("weakness"    ,"Существо чуствует слабость"  ,{"W",0x993333,0xFF0000},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
+createModifiers("strengthened","Существо чуствует прилив сил",{"S",0x339933,0x00FF00},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
+createModifiers("protected"   ,"Существо готово к защите"    ,{"P",0x333399,0x0000FF},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
+
 -- Создание способностей
-createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,powerAttack,5,3,{})
-createAbilities("Fisting rain","Разбивает лица сразу трем противникам",3,standartAttack,6,0.7,{})
+-- local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
+createAbilities("Attack"      ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{           })
+createAbilities("Defence"     ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{"protected"})
+createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,standartAttack,5,3  ,false,false,0,{           })
+createAbilities("Fisting rain","Разбивает лица сразу трем противникам"                            ,3,standartAttack,6,0.7,false,false,0,{"weakness" })
+createAbilities("Power bolt"  ,""                                                                 ,1,standartAttack,0,1  ,false,true ,3,{           })
 
 -- Создание магия
-createSpells   ("Power bolt","Магический болт!... болт...",3,powerBolt,6,3,false,{})
+-- local function createSpells(name,description,cost,abilitie)
+createSpells   ("Power bolt","Магический болт!... болт...",3,{"❇️",0xDDDDDD,0x9999DD},"Power bolt")
 
 -- функции элементов
-local function none(n) return true end
-
 local function collisionToPlayer(e,x,y)
 	if (e.xGrid2+x == player.xGrid or e.xGrid2+x == player.xGrid2) and
 	   (e.yGrid2+y == player.yGrid or e.yGrid2+y == player.yGrid2) then return true end

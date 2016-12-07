@@ -564,10 +564,10 @@ local function putInInventory(item, category, count)
 	if type(item) == "string" then item = itemFind(category, item) end
 	if not count then count = 1 end
 	for i in pairs(inventory) do
-		if inventory[i].num == item then inventory[i].count = inventory[i].count + count; return end
+		if inventory[i].num == item and inventory[i].category == category then inventory[i].count = inventory[i].count + count; return end
 	end
 	table.insert(inventory,{
-		num = num,
+		num = item,
 		category = category,
 		count = count
 	})
@@ -576,7 +576,7 @@ local function takeFromInventory(item, category, count)
 	if type(item) == "string" then item = itemFind(category, item) end
 	if not count then count = 1 end
 	for i in pairs(inventory) do
-		if inventory[i].num == item then
+		if inventory[i].num == item and inventory[i].category == category then
 			if inventory[i].count >= count then
 				inventory[i].count = inventory[i].count - count
 				if inventory[i].count <= 0 then
@@ -593,12 +593,10 @@ end
 local function dressEquipment(item, object, category)
 	if type(item) == "string" then item = category[itemFind(category, item)] end
 	if type(item) == "number" then item = category[item]                     end
-	if takeFromInventory(item, category) then
-		if category == itemCategories.armours then if not object.equipment.armour then object.equipment.armour = item; return true end end
-		if category == itemCategories.weapons then if not object.equipment.weapon then object.equipment.weapon = item; return true end end
-		if category == itemCategories.rings   then if not object.equipment.ring   then object.equipment.ring   = item; return true end end
-		if category == itemCategories.shields then if not object.equipment.shield then object.equipment.shield = item; return true end end
-	end
+	if category == itemCategories.armours then if not object.equipment.armour then object.equipment.armour = item; return true end end
+	if category == itemCategories.weapons then if not object.equipment.weapon then object.equipment.weapon = item; return true end end
+	if category == itemCategories.rings   then if not object.equipment.ring   then object.equipment.ring   = item; return true end end
+	if category == itemCategories.shields then if not object.equipment.shield then object.equipment.shield = item; return true end end
 	return false
 end
 
@@ -637,7 +635,7 @@ local function addSpellFromScroll(item, object, category)
 	if type(item.arguments[1]) == "string" then item.arguments[1] =  getTableNumberByName(spells, item.arguments[1]) end
 	local willpower = object.parameters.willpower
 	for i in pairs(object.spells) do
-		willpower = willpower - spells[object.spells[i]].cost
+		willpower = willpower - spells[object.spells[i].num].cost
 	end
 	if willpower >= spells[item.arguments[1]].cost then
 		addSpell(object,item.arguments[1])
@@ -1337,8 +1335,8 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
-					inventory[i].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category)
-					if inventory[i].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
+					if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
+					if inventory[i].category[inventory[i].num].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
 			end
@@ -1574,7 +1572,8 @@ itemCreator("Свиток силового болта","Топор для руб
 addSquadMember("Лин",15000,{10,10,15,15},{nil,nil,nil,nil},aSD .. "/Lin.pic")
 
 -- наполняем карманы коксом --
-putInInventory("Свиток силового болта",itemCategories.scrolls)
+putInInventory("Свиток силового болта",itemCategories.scrolls, 900)
+putInInventory("Броня из хитина жука" ,itemCategories.armours, 900)
 
 player.equipment.armour = itemCategories.armours[1]
 player.equipment.weapon = itemCategories.weapons[1]

@@ -444,7 +444,7 @@ end
 local abilities = {}
 local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
 	for i in pairs(modifiers) do
-		modifiers[i] = getTableNumberByName(modifiers[i])
+		modifiers[i] = getTableNumberByName(modifiers,name)
 	end
 	table.insert(abilities,{
 		name=name,
@@ -463,7 +463,7 @@ end
 -- магия
 local spells = {}
 local function createSpells(name,description,cost,abilitie)
-	abilitie = getTableNumberByName(abilitie)
+	abilitie = getTableNumberByName(abilities, abilitie)
 	table.insert(spells,{
 		name=name,
 		description=description,

@@ -605,13 +605,18 @@ end
 
 -- магия
 local spells = {}
-local function createSpells(name,description,cost,abilitie)
+local function createSpells(name,description,cost,abilitie,symbol)
 	abilitie = getTableNumberByName(abilities, abilitie)
 	table.insert(spells,{
 		name       =name       ,
 		description=description,
 		cost       =cost       ,
-		abilitie   =abilitie
+		abilitie   =abilitie   ,
+		symbol = {
+			letter=symbol[1],
+			fColor=symbol[2],
+			bColor=symbol[3],
+		},
 	})
 end
 
@@ -1273,6 +1278,17 @@ local function drawSideMenu()
 		buffer.text (math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,0x000000,"COULDOWN")
 	elseif selectedMenu == 4 then
 		-- меню магии
+		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
+		for i in pairs(squadMember.spells) do
+			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
+			buffer.text(buffer.screen.width - string.len("Couldown:" .. spells[squadMember.spells[i]].num),13+5*(i-1),0x000000,("Couldown:" .. spells[squadMember.spells[i].num].couldown))
+			local description = textFormat(spells[squadMember.spells[i].num].description,windows.sideMenuWindow.width)
+			for r in pairs(description) do
+				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
+			end
+		end
+		
 		local i = 13
 		while i < windows.dialogWindow.y do
 			if i%2==0 then
@@ -1289,9 +1305,9 @@ local function drawSideMenu()
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
 		for i in pairs(squadMember.abilities) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
-			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squad[battle.partyMemberTurn].abilities[i]].name)
-			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown))
-			local description = textFormat(abilities[squad[battle.partyMemberTurn].abilities[i]].description,windows.sideMenuWindow.width)
+			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squadMember.abilities[i]].name)
+			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squadMember.abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squadMember.abilities[i]].couldown))
+			local description = textFormat(abilities[squadMember.abilities[i]].description,windows.sideMenuWindow.width)
 			for r in pairs(description) do
 				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
 			end
@@ -1431,7 +1447,8 @@ local function mainDraw()
 	--for i in pairs(battle.selectedEnemysNum) do
 	--	  buffer.text(96, 1+i, 0x000000, battle.selectedEnemysNum[i] .. "  1")
 	--end
-	buffer.text(64, 2, 0x000000, "menuLock: " .. tostring(menuLock))
+	buffer.text(32, 2, 0x000000, "menuSele: " .. tostring(selectedMenu))
+	buffer.text(64, 2, 0x000000, "menuLock: " .. tostring(menuLock    ))
 	-- отрисовка изменений --
 	buffer.draw()
 end
@@ -1464,8 +1481,8 @@ createAbilities("Fisting rain","Разбивает лица сразу трем 
 createAbilities("Power bolt"  ,""                                                                 ,1,standartAttack,0,1  ,false,true ,3,{           })
 
 -- Создание магия
--- local function createSpells(name,description,cost,abilitie)
-createSpells   ("Power bolt","Магический болт!... болт...",3,{"??",0xDDDDDD,0x9999DD},"Power bolt")
+-- local function createSpells(name,description,cost,abilitie,symbol)
+createSpells   ("Power bolt","Магический болт!... болт...",3,{"??",0xDDDDDD,0x9999DD},"Power bolt",{"✹",0x5555FF,0x222222})
 
 -- функции элементов
 local function collisionToPlayer(e,x,y)

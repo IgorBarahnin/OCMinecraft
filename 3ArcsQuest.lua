@@ -1282,8 +1282,8 @@ local function drawSideMenu()
 		for i in pairs(squadMember.spells) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			-- symbol
-			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[squadMember.spells[i].abilitie].symbol.bColor)
-			buffer.text  (windows.sideMenuWindow.x+2,13+5*(i-1),abilities[squadMember.spells[i].abilitie].symbol.fColor,abilities[squadMember.spells[i].abilitie].symbol.letter)
+			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[spells[squadMember.spells[i].num].abilitie].symbol.bColor)
+			buffer.text  (windows.sideMenuWindow.x+2,13+5*(i-1),abilities[spells[squadMember.spells[i].num].abilitie].symbol.fColor,abilities[spells[squadMember.spells[i].num].abilitie].symbol.letter)
 			-- symbol
 			buffer.text(windows.sideMenuWindow.x+3,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
 			buffer.text(buffer.screen.width - string.len("Willpower:" .. spells[squadMember.spells[i].num].willpower),13+5*(i-1),0x000000,("Willpower:" .. spells[squadMember.spells[i].num].willpower))

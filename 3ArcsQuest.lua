@@ -1455,7 +1455,7 @@ createAbilities("Power bolt"  ,""                                               
 
 -- Создание магия
 -- local function createSpells(name,description,cost,abilitie)
-createSpells   ("Power bolt","Магический болт!... болт...",3,{"❇️",0xDDDDDD,0x9999DD},"Power bolt")
+createSpells   ("Power bolt","Магический болт!... болт...",3,{"??",0xDDDDDD,0x9999DD},"Power bolt")
 
 -- функции элементов
 local function collisionToPlayer(e,x,y)
@@ -1524,9 +1524,11 @@ end
 
 -- шлепаем кнопки
 -- local function createButton(square,bgcolor,text,color,func)
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*0+2,   9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0x55DDDD, "ITEMS"    , 0x000000, none            , switchMenu  , {0})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*1+2,   9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0xDD55DD, "EQUIP"    , 0x000000, none            , switchMenu  , {1})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/3)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/3),3}, 0xDDDD55, "SQUAD"    , 0x000000, none            , switchMenu  , {2})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*0+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0x55DDDD, "ITEMS"    , 0x000000, none            , switchMenu  , {0})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*1+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDD55DD, "EQUIP"    , 0x000000, none            , switchMenu  , {1})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDD55, "SQUAD"    , 0x000000, none            , switchMenu  , {2})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDD55, "ABILI"    , 0x000000, none            , switchMenu  , {6})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDD55, "MAGIC"    , 0x000000, none            , switchMenu  , {7})
 createButton({windows.sideMenuWindow.x                                                 +2,14+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ATTACK"   , 0x000000, menuEquallyThree, useAbility  , {1})
 createButton({windows.sideMenuWindow.x                                                 +2,18+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "DEFENCE"  , 0x000000, menuEquallyThree, useAbility  , {2})
 createButton({windows.sideMenuWindow.x                                                 +2,22+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "MAGIC"    , 0x000000, menuEquallyThree, switchMenu  , {4})

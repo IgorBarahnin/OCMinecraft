@@ -66,7 +66,7 @@ local aSD  = (aID .. "/squad")
 local config = {
 	FPS                = 0.05,
 	dialogWindowSize   = 0.2 ,
-	sideMenuWindowSize = 0.34
+	sideMenuWindowSize = 0.32
 }
 
 -- пути к файлам --
@@ -605,18 +605,13 @@ end
 
 -- магия
 local spells = {}
-local function createSpells(name,description,cost,abilitie,symbol)
+local function createSpells(name,description,cost,abilitie)
 	abilitie = getTableNumberByName(abilities, abilitie)
 	table.insert(spells,{
 		name       =name       ,
 		description=description,
 		cost       =cost       ,
-		abilitie   =abilitie   ,
-		symbol = {
-			letter=symbol[1],
-			fColor=symbol[2],
-			bColor=symbol[3],
-		},
+		abilitie   =abilitie
 	})
 end
 
@@ -1278,24 +1273,25 @@ local function drawSideMenu()
 		buffer.text (math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,0x000000,"COULDOWN")
 	elseif selectedMenu == 4 then
 		-- меню магии
-		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
-		for i in pairs(squadMember.spells) do
-			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
-			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
-			buffer.text(buffer.screen.width - string.len("Couldown:" .. spells[squadMember.spells[i]].num),13+5*(i-1),0x000000,("Couldown:" .. spells[squadMember.spells[i].num].couldown))
-			local description = textFormat(spells[squadMember.spells[i].num].description,windows.sideMenuWindow.width)
-			for r in pairs(description) do
-				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
+		local i = 13
+		while i < windows.dialogWindow.y do
+			if i%2==0 then
+				buffer.square(windows.sideMenuWindow.x+2,i,windows.sideMenuWindow.width,1,0x777777)
 			end
+			i = i + 1
+		end
+		for i in pairs(squadMember.spells) do
+			buffer.text(windows.sideMenuWindow.x+2,i+12,0x000000,spells[squadMember.spells[i].num].name)
+			buffer.text((buffer.screen.width+1)-string.len(inventory[i].count),i+12,0x000000,squadMember.spells[i].count)
 		end
 	elseif selectedMenu == 5 then
 		-- меню умений
-		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
-		for i in pairs(squadMember.abilities) do
+		if inBattle then squadMember = squad[battle.partyMemberTurn].abilities; end
+		for i in pairs(squadMember) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
-			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squadMember.abilities[i]].name)
-			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squadMember.abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squadMember.abilities[i]].couldown))
-			local description = textFormat(abilities[squadMember.abilities[i]].description,windows.sideMenuWindow.width)
+			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squad[battle.partyMemberTurn].abilities[i]].name)
+			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown))
+			local description = textFormat(abilities[squad[battle.partyMemberTurn].abilities[i]].description,windows.sideMenuWindow.width)
 			for r in pairs(description) do
 				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
 			end
@@ -1349,7 +1345,7 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
-					--if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
+					if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
 					if inventory[i].category[inventory[i].num].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
@@ -1394,7 +1390,7 @@ local function mainInput()
 		elseif selectedMenu == 5 then
 			for i in pairs(squad[battle.partyMemberTurn].abilities) do
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,13+(i-1)*5,buffer.screen.width-windows.sideMenuWindow.x,8}) then
-					if inBattle then useAbility({squad[battle.partyMemberTurn].abilities[i]}) end
+					useAbility({squad[battle.partyMemberTurn].abilities[i]})
 				end
 			end
 		end
@@ -1435,8 +1431,7 @@ local function mainDraw()
 	--for i in pairs(battle.selectedEnemysNum) do
 	--	  buffer.text(96, 1+i, 0x000000, battle.selectedEnemysNum[i] .. "  1")
 	--end
-	buffer.text(32, 2, 0x000000, "menuSele: " .. tostring(selectedMenu))
-	buffer.text(64, 2, 0x000000, "menuLock: " .. tostring(menuLock    ))
+	buffer.text(64, 2, 0x000000, "menuLock: " .. tostring(menuLock))
 	-- отрисовка изменений --
 	buffer.draw()
 end
@@ -1469,8 +1464,8 @@ createAbilities("Fisting rain","Разбивает лица сразу трем 
 createAbilities("Power bolt"  ,""                                                                 ,1,standartAttack,0,1  ,false,true ,3,{           })
 
 -- Создание магия
--- local function createSpells(name,description,cost,abilitie,symbol)
-createSpells   ("Power bolt","Магический болт!... болт...",3,{"??",0xDDDDDD,0x9999DD},"Power bolt",{"✹",0x5555FF,0x222222})
+-- local function createSpells(name,description,cost,abilitie)
+createSpells   ("Power bolt","Магический болт!... болт...",3,{"??",0xDDDDDD,0x9999DD},"Power bolt")
 
 -- функции элементов
 local function collisionToPlayer(e,x,y)

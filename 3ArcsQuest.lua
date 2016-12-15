@@ -1229,7 +1229,6 @@ local function drawSideMenu()
 
 	elseif selectedMenu == 2 then
 		-- меню группы
-		
 		for i in pairs(squad) do
 			if i%2 == 0 then buffer.square(windows.sideMenuWindow.x+2,13+(i-1)*8,windows.sideMenuWindow.width,8,0x777777) end
 			buffer.image(windows.sideMenuWindow.x+2,13+(i-1)*8,squad[i].squadImage)
@@ -1274,10 +1273,21 @@ local function drawSideMenu()
 		buffer.text (math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,0x000000,"COULDOWN")
 	elseif selectedMenu == 4 then
 		-- меню магии
-		
+		local i = 13
+		while i < windows.dialogWindow.y do
+			if i%2==0 then
+				buffer.square(windows.sideMenuWindow.x+2,i,windows.sideMenuWindow.width,1,0x777777)
+			end
+			i = i + 1
+		end
+		for i in pairs(squadMember.spells) do
+			buffer.text(windows.sideMenuWindow.x+2,i+12,0x000000,spells[squadMember.spells[i].num].name)
+			buffer.text((buffer.screen.width+1)-string.len(inventory[i].count),i+12,0x000000,squadMember.spells[i].count)
+		end
 	elseif selectedMenu == 5 then
 		-- меню умений
-		for i in pairs(squad[battle.partyMemberTurn].abilities) do
+		if inBattle then squadMember = squad[battle.partyMemberTurn].abilities; end
+		for i in pairs(squadMember) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squad[battle.partyMemberTurn].abilities[i]].name)
 			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squad[battle.partyMemberTurn].abilities[i]].couldown))
@@ -1524,16 +1534,16 @@ end
 
 -- шлепаем кнопки
 -- local function createButton(square,bgcolor,text,color,func)
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*0+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0x55DDDD, "ITEMS"    , 0x000000, none            , switchMenu  , {0})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*1+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDD55DD, "EQUIP"    , 0x000000, none            , switchMenu  , {1})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDD55, "SQUAD"    , 0x000000, none            , switchMenu  , {2})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDD55, "ABILI"    , 0x000000, none            , switchMenu  , {6})
-createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDD55, "MAGIC"    , 0x000000, none            , switchMenu  , {7})
-createButton({windows.sideMenuWindow.x                                                 +2,14+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ATTACK"   , 0x000000, menuEquallyThree, useAbility  , {1})
-createButton({windows.sideMenuWindow.x                                                 +2,18+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "DEFENCE"  , 0x000000, menuEquallyThree, useAbility  , {2})
-createButton({windows.sideMenuWindow.x                                                 +2,22+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "MAGIC"    , 0x000000, menuEquallyThree, switchMenu  , {4})
-createButton({windows.sideMenuWindow.x                                                 +2,26+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "ABILITIES", 0x000000, menuEquallyThree, switchMenu  , {5})
-createButton({windows.sideMenuWindow.x                                                 +2,30+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDD55, "RUN"      , 0x000000, menuEquallyThree, battleFinish, { })
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*0+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDDDD, "ITEMS"    , 0x000000, none            , switchMenu  , {0})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*1+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0x777777, "EQUIP"    , 0x000000, none            , switchMenu  , {1})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*2+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDDDD, "SQUAD"    , 0x000000, none            , switchMenu  , {2})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*3+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0x777777, "ABILI"    , 0x000000, none            , switchMenu  , {5})
+createButton({windows.sideMenuWindow.x+math.floor((windows.sideMenuWindow.width-2)/5)*4+2,   9,math.floor((windows.sideMenuWindow.width-2)/5),3}, 0xDDDDDD, "MAGIC"    , 0x000000, none            , switchMenu  , {4})
+createButton({windows.sideMenuWindow.x                                                 +2,14+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0x777777, "ATTACK"   , 0x000000, menuEquallyThree, useAbility  , {1})
+createButton({windows.sideMenuWindow.x                                                 +2,18+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDDDD, "DEFENCE"  , 0x000000, menuEquallyThree, useAbility  , {2})
+createButton({windows.sideMenuWindow.x                                                 +2,22+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0x777777, "MAGIC"    , 0x000000, menuEquallyThree, switchMenu  , {4})
+createButton({windows.sideMenuWindow.x                                                 +2,26+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0xDDDDDD, "ABILITIES", 0x000000, menuEquallyThree, switchMenu  , {5})
+createButton({windows.sideMenuWindow.x                                                 +2,30+7,math.floor((windows.sideMenuWindow.width-2)  ),4}, 0x777777, "RUN"      , 0x000000, menuEquallyThree, battleFinish, { })
 
 -- гладим котиков
 -- local function createEnemy(name,hp,s,a,i,w,hea,arm,dam,imagePath)

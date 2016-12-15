@@ -443,9 +443,9 @@ end
 
 -- умения
 local abilities = {}
-local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers,symbol)
-	for i in pairs(modifiers) do
-		modifiers[i] = getTableNumberByName(modifiers,modifiers[i])
+local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modif,symbol)
+	for i in pairs(modif) do
+		modif[i] = getTableNumberByName(modifiers,modif[i])
 	end
 	table.insert(abilities,{
 		name=name,
@@ -457,7 +457,7 @@ local function createAbilities(name,description,targets,func,couldown,multiplier
 		armourIgnor=armourIgnor,
 		magick=magick,
 		dammage=dammage,
-		modifiers=modifiers,
+		modif=modif,
 		symbol = {
 			letter=symbol[1],
 			fColor=symbol[2],
@@ -1281,7 +1281,7 @@ local function drawSideMenu()
 		-- меню магии
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
 		for i in pairs(squadMember.spells) do
-			if i%2 == 0 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			if i%2 == 1 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			-- symbol
 			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[spells[squadMember.spells[i].num].abilitie].symbol.bColor)
 			buffer.text  (windows.sideMenuWindow.x+2,13+5*(i-1),abilities[spells[squadMember.spells[i].num].abilitie].symbol.fColor,abilities[spells[squadMember.spells[i].num].abilitie].symbol.letter)
@@ -1310,7 +1310,11 @@ local function drawSideMenu()
 		-- меню умений
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
 		for i in pairs(squadMember.abilities) do
-			if i%2 == 0 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			if i%2 == 1 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			-- symbol
+			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[squadMember.abilities[i]].symbol.bColor)
+			buffer.text  (windows.sideMenuWindow.x+2,13+5*(i-1),abilities[squadMember.abilities[i]].symbol.fColor,abilities[squadMember.abilities[i]].symbol.letter)
+			-- symbol
 			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squadMember.abilities[i]].name)
 			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squadMember.abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squadMember.abilities[i]].couldown))
 			local description = textFormat(abilities[squadMember.abilities[i]].description,windows.sideMenuWindow.width)
@@ -1472,13 +1476,13 @@ end
 ------------------- =====
 
 -- создание модификаторов
--- local function createModifiers(name,description           ,{l,f,b},{s  ,a  ,i  ,w  ,at ,bl ,ac ,de ,hea})
+--             (name          ,description                   ,{l  ,f       ,b       },{s  ,a  ,i  ,w  ,at ,bl ,ac ,de ,hea})
 createModifiers("weakness"    ,"Существо чуствует слабость"  ,{"W",0x993333,0xFF0000},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
 createModifiers("strengthened","Существо чуствует прилив сил",{"S",0x339933,0x00FF00},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
 createModifiers("protected"   ,"Существо готово к защите"    ,{"P",0x333399,0x0000FF},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
 
 -- Создание способностей
--- local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
+--             (name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
 createAbilities("Attack"      ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{           },{"A",0xFFFFFF,0x000000})
 createAbilities("Defence"     ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{"protected"},{"D",0xFFFFFF,0x000000})
 createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,standartAttack,5,3  ,false,false,0,{           },{"P",0xFFDDDD,0x000000})
@@ -1486,8 +1490,8 @@ createAbilities("Fisting rain","Разбивает лица сразу трем 
 createAbilities("Power bolt"  ,""                                                                 ,1,standartAttack,0,1  ,false,true ,3,{           },{"P",0xDDDDFF,0x000000})
 
 -- Создание магия
--- local function createSpells(name,description,cost,abilitie)
-createSpells   ("Power bolt","Магический болт!... болт...",3,{"??",0xDDDDDD,0x9999DD},"Power bolt")
+--             (name        ,description                  ,cost,abilitie    )
+createSpells   ("Power bolt","Магический болт!... болт...",3   ,"Power bolt")
 
 -- функции элементов
 local function collisionToPlayer(e,x,y)

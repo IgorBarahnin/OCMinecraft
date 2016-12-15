@@ -1376,7 +1376,7 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
-					--if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
+					inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) 
 					if inventory[i].category[inventory[i].num].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
@@ -1620,6 +1620,7 @@ player.equipment.armour = itemCategories.armours[1]
 player.equipment.weapon = itemCategories.weapons[1]
 table.insert(player.abilities,3)
 table.insert(player.abilities,4)
+addSpell(player,1,1)
 
 calculateAllCharacteristics(player.parameters,player.equipment,player.modifiers)
 

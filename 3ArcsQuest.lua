@@ -442,7 +442,7 @@ end
 
 -- умения
 local abilities = {}
-local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
+local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers,symbol)
 	for i in pairs(modifiers) do
 		modifiers[i] = getTableNumberByName(modifiers,name)
 	end
@@ -456,7 +456,12 @@ local function createAbilities(name,description,targets,func,couldown,multiplier
 		armourIgnor=armourIgnor,
 		magick=magick,
 		dammage=dammage,
-		modifiers=modifiers
+		modifiers=modifiers,
+		symbol = {
+			letter=symbol[1],
+			fColor=symbol[2],
+			bColor=symbol[3],
+		},
 	})
 end
 
@@ -611,7 +616,7 @@ local function createSpells(name,description,cost,abilitie)
 		name       =name       ,
 		description=description,
 		cost       =cost       ,
-		abilitie   =abilitie
+		abilitie   =abilitie   
 	})
 end
 
@@ -1276,8 +1281,12 @@ local function drawSideMenu()
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
 		for i in pairs(squadMember.spells) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
-			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
-			buffer.text(buffer.screen.width - string.len("Couldown:" .. spells[squadMember.spells[i].num].couldown),13+5*(i-1),0x000000,("Couldown:" .. spells[squadMember.spells[i].num].couldown))
+			-- symbol
+			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[squadMember.spells[i].abilitie].symbol.bColor)
+			buffer.text  (windows.sideMenuWindow.x+2,13+5*(i-1),abilities[squadMember.spells[i].abilitie].symbol.fColor,abilities[squadMember.spells[i].abilitie].symbol.letter)
+			-- symbol
+			buffer.text(windows.sideMenuWindow.x+3,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
+			buffer.text(buffer.screen.width - string.len("Willpower:" .. spells[squadMember.spells[i].num].willpower),13+5*(i-1),0x000000,("Willpower:" .. spells[squadMember.spells[i].num].willpower))
 			local description = textFormat(spells[squadMember.spells[i].num].description,windows.sideMenuWindow.width)
 			for r in pairs(description) do
 				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
@@ -1469,11 +1478,11 @@ createModifiers("protected"   ,"Существо готово к защите"  
 
 -- Создание способностей
 -- local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)
-createAbilities("Attack"      ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{           })
-createAbilities("Defence"     ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{"protected"})
-createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,standartAttack,5,3  ,false,false,0,{           })
-createAbilities("Fisting rain","Разбивает лица сразу трем противникам"                            ,3,standartAttack,6,0.7,false,false,0,{"weakness" })
-createAbilities("Power bolt"  ,""                                                                 ,1,standartAttack,0,1  ,false,true ,3,{           })
+createAbilities("Attack"      ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{           },{"A",0xFFFFFF,0x000000})
+createAbilities("Defence"     ,""                                                                 ,1,standartAttack,0,1  ,false,false,0,{"protected"},{"D",0xFFFFFF,0x000000})
+createAbilities("Power attack","Герой ябашит как всемогущий нанося тройной урон одному противнику",1,standartAttack,5,3  ,false,false,0,{           },{"P",0xFFDDDD,0x000000})
+createAbilities("Fisting rain","Разбивает лица сразу трем противникам"                            ,3,standartAttack,6,0.7,false,false,0,{"weakness" },{"F",0xFFDDDD,0x000000})
+createAbilities("Power bolt"  ,""                                                                 ,1,standartAttack,0,1  ,false,true ,3,{           },{"P",0xDDDDFF,0x000000})
 
 -- Создание магия
 -- local function createSpells(name,description,cost,abilitie)

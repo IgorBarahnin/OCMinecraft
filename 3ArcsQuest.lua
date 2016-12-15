@@ -1345,7 +1345,7 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
-					if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
+					--if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
 					if inventory[i].category[inventory[i].num].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
@@ -1390,7 +1390,7 @@ local function mainInput()
 		elseif selectedMenu == 5 then
 			for i in pairs(squad[battle.partyMemberTurn].abilities) do
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,13+(i-1)*5,buffer.screen.width-windows.sideMenuWindow.x,8}) then
-					useAbility({squad[battle.partyMemberTurn].abilities[i]})
+					if inBattle then useAbility({squad[battle.partyMemberTurn].abilities[i]}) end
 				end
 			end
 		end

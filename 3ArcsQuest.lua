@@ -416,10 +416,11 @@ local function battleLogInsertInDialog()
 end
 -- модификаторы
 local modifiers = {}
-local function createModifiers(name,description,symbol,parameters)
+local function createModifiers(name,description,symbol,parameters,duration)
 	table.insert(modifiers,{
 		name=name,
 		description=description,
+		duration=duration,
 		symbol = {
 			letter=symbol[1],
 			fColor=symbol[2],
@@ -478,6 +479,9 @@ local function standartAttack(attacker,targets,abilitie)
 		if dam < 0 then dam = 0 end
 		targets[i].hp = targets[i].hp - dam
 		battleLogAddMesage("Target " .. i .. ":" .. targets[i].name .. " take " .. dam .. " dammage")
+		for r in pairs(abilitie.modifiers) do
+			table.insert(targets[i].modifiers,abilitie.modifiers[r])
+		end
 	end
 end
 
@@ -641,7 +645,7 @@ local function addSpellFromScroll(item, object, category)
 	if type(item.arguments[1]) == "string" then item.arguments[1] =  getTableNumberByName(spells, item.arguments[1]) end
 	local willpower = object.parameters.willpower
 	for i in pairs(object.spells) do
-		willpower = willpower - spells[object.spells[i].num].cost
+		willpower = willpower - (spells[object.spells[i].num].cost*spells[object.spells[i].num].count)
 	end
 	if willpower >= spells[item.arguments[1]].cost then
 		addSpell(object,item.arguments[1])
@@ -1477,10 +1481,10 @@ end
 ------------------- =====
 
 -- создание модификаторов
---             (name          ,description                   ,{l  ,f       ,b       },{s  ,a  ,i  ,w  ,at ,bl ,ac ,de ,hea})
-createModifiers("weakness"    ,"Существо чуствует слабость"  ,{"W",0x993333,0xFF0000},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
-createModifiers("strengthened","Существо чуствует прилив сил",{"S",0x339933,0x00FF00},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
-createModifiers("protected"   ,"Существо готово к защите"    ,{"P",0x333399,0x0000FF},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  })
+--             (name          ,description                   ,{l  ,f       ,b       },{s  ,a  ,i  ,w  ,at ,bl ,ac ,de ,hea},duration)
+createModifiers("weakness"    ,"Существо чуствует слабость"  ,{"W",0x993333,0xFF0000},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  },5)
+createModifiers("strengthened","Существо чуствует прилив сил",{"S",0x339933,0x00FF00},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  },5)
+createModifiers("protected"   ,"Существо готово к защите"    ,{"P",0x333399,0x0000FF},{0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  ,0  },5)
 
 -- Создание способностей
 --             (name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers)

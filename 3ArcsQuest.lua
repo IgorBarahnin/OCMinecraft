@@ -32,6 +32,7 @@ local function getTableNumberByName(array,name)
 	for i in pairs(array) do
 		if array[i].name == name then return i end
 	end
+	error(tostring(name) .. "не существует")
 end
 
 -- костыль, наверное...
@@ -611,7 +612,7 @@ end
 -- магия
 local spells = {}
 local function createSpells(name,description,cost,abilitie)
-	abilitie = getTableNumberByName(abilities, abilitie)
+	if type(abilitie) == "string" then abilitie = getTableNumberByName(abilities, abilitie) end
 	table.insert(spells,{
 		name       =name       ,
 		description=description,
@@ -1280,13 +1281,13 @@ local function drawSideMenu()
 		-- меню магии
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
 		for i in pairs(squadMember.spells) do
-			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			if i%2 == 0 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			-- symbol
 			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[spells[squadMember.spells[i].num].abilitie].symbol.bColor)
 			buffer.text  (windows.sideMenuWindow.x+2,13+5*(i-1),abilities[spells[squadMember.spells[i].num].abilitie].symbol.fColor,abilities[spells[squadMember.spells[i].num].abilitie].symbol.letter)
 			-- symbol
 			buffer.text(windows.sideMenuWindow.x+3,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
-			buffer.text(buffer.screen.width - string.len("Willpower:" .. spells[squadMember.spells[i].num].willpower),13+5*(i-1),0x000000,("Willpower:" .. spells[squadMember.spells[i].num].willpower))
+			buffer.text(buffer.screen.width - string.len("Willpower:" .. spells[squadMember.spells[i].num].cost),13+5*(i-1),0x000000,("Willpower:" .. spells[squadMember.spells[i].num].cost))
 			local description = textFormat(spells[squadMember.spells[i].num].description,windows.sideMenuWindow.width)
 			for r in pairs(description) do
 				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
@@ -1309,7 +1310,7 @@ local function drawSideMenu()
 		-- меню умений
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
 		for i in pairs(squadMember.abilities) do
-			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			if i%2 == 0 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squadMember.abilities[i]].name)
 			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squadMember.abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squadMember.abilities[i]].couldown))
 			local description = textFormat(abilities[squadMember.abilities[i]].description,windows.sideMenuWindow.width)

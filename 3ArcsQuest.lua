@@ -1273,6 +1273,17 @@ local function drawSideMenu()
 		buffer.text (math.floor((windows.sideMenuWindow.x+2+windows.sideMenuWindow.width/2)-string.len("COULDOWN")/2),13,0x000000,"COULDOWN")
 	elseif selectedMenu == 4 then
 		-- меню магии
+		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
+		for i in pairs(squadMember.spells) do
+			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
+			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,spells[squadMember.spells[i].num].name)
+			buffer.text(buffer.screen.width - string.len("Couldown:" .. spells[squadMember.spells[i].num].couldown),13+5*(i-1),0x000000,("Couldown:" .. spells[squadMember.spells[i].num].couldown))
+			local description = textFormat(spells[squadMember.spells[i].num].description,windows.sideMenuWindow.width)
+			for r in pairs(description) do
+				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
+			end
+		end
+		--[[
 		local i = 13
 		while i < windows.dialogWindow.y do
 			if i%2==0 then
@@ -1284,10 +1295,11 @@ local function drawSideMenu()
 			buffer.text(windows.sideMenuWindow.x+2,i+12,0x000000,spells[squadMember.spells[i].num].name)
 			buffer.text((buffer.screen.width+1)-string.len(inventory[i].count),i+12,0x000000,squadMember.spells[i].count)
 		end
+		]]--
 	elseif selectedMenu == 5 then
 		-- меню умений
-		if inBattle then squadMember = squad[battle.partyMemberTurn].abilities; end
-		for i in pairs(squadMember.abilities[i]) do
+		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
+		for i in pairs(squadMember.abilities) do
 			if i%2 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			buffer.text(windows.sideMenuWindow.x+2,13+5*(i-1),0x000000,abilities[squadMember.abilities[i]].name)
 			buffer.text(buffer.screen.width - string.len("Couldown:" .. abilities[squadMember.abilities[i]].couldown),13+5*(i-1),0x000000,("Couldown:" .. abilities[squadMember.abilities[i]].couldown))

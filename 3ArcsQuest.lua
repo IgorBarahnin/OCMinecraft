@@ -32,7 +32,7 @@ local function getTableNumberByName(array,name)
 	for i in pairs(array) do
 		if array[i].name == name then return i end
 	end
-	error(tostring(name) .. "не существует")
+	error(tostring(name) .. " не существует!")
 end
 
 -- костыль, наверное...
@@ -445,7 +445,7 @@ end
 local abilities = {}
 local function createAbilities(name,description,targets,func,couldown,multiplier,armourIgnor,magick,dammage,modifiers,symbol)
 	for i in pairs(modifiers) do
-		modifiers[i] = getTableNumberByName(modifiers,name)
+		modifiers[i] = getTableNumberByName(modifiers,modifiers[i])
 	end
 	table.insert(abilities,{
 		name=name,

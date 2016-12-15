@@ -1292,7 +1292,6 @@ local function drawSideMenu()
 			for r in pairs(description) do
 				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
 			end
-			buffer.text(buffer.screen.width - string.len("Count:" .. squadMember.spells[i].count),16+5*(i-1),0x000000,("Count:" .. squadMember.spells[i].count))
 		end
 		--[[
 		local i = 13
@@ -1310,7 +1309,7 @@ local function drawSideMenu()
 	elseif selectedMenu == 5 then
 		-- меню умений
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
-		for i = 3 in pairs(squadMember.abilities) do
+		for i in pairs(squadMember.abilities) do
 			if i%2 == 1 then buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),windows.sideMenuWindow.width,5,0x777777) end
 			-- symbol
 			buffer.square(windows.sideMenuWindow.x+2,13+5*(i-1),1,1,abilities[squadMember.abilities[i]].symbol.bColor)
@@ -1372,7 +1371,7 @@ local function mainInput()
 				local squadMember = squad[selectedSquadMember]
 				if clicked(e[3], e[4], {windows.sideMenuWindow.x,12+i,buffer.screen.width-windows.sideMenuWindow.x,1}) then
 					--putInInventory(inventory[i].name, inventory[i].category)
-					--if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
+					if not inventory[i].category[inventory[i].num].func(inventory[i].category[inventory[i].num],squadMember,inventory[i].category) then error("Some shit not happened!") end
 					if inventory[i].category[inventory[i].num].oneUse then takeFromInventory(inventory[i].num,inventory[i].category) end
 					calculateAllCharacteristics(squadMember.parameters,squadMember.equipment,squadMember.modifiers)
 				end
@@ -1415,8 +1414,8 @@ local function mainInput()
 		elseif selectedMenu == 4 then
 		
 		elseif selectedMenu == 5 then
-			for i = 3 in pairs(squad[battle.partyMemberTurn].abilities) do
-				if clicked(e[3], e[4], {windows.sideMenuWindow.x,13+(i-3)*5,buffer.screen.width-windows.sideMenuWindow.x,8}) then
+			for i in pairs(squad[battle.partyMemberTurn].abilities) do
+				if clicked(e[3], e[4], {windows.sideMenuWindow.x,13+(i-1)*5,buffer.screen.width-windows.sideMenuWindow.x,8}) then
 					useAbility({squad[battle.partyMemberTurn].abilities[i]})
 				end
 			end
@@ -1548,7 +1547,9 @@ end
 
 local function switchMenu(e)
 	if not menuLock then
-		selectedMenu = e[1]
+		if selectedMenu > 2 or not inBattle then 
+			selectedMenu = e[1]
+		end
 	end
 end
 

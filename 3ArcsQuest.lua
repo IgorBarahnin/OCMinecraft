@@ -1288,18 +1288,6 @@ local function drawSideMenu()
 				buffer.text(windows.sideMenuWindow.x+2,14+5*(i-1)+r,0x000000,description[r])
 			end
 		end
-		
-		local i = 13
-		while i < windows.dialogWindow.y do
-			if i%2==0 then
-				buffer.square(windows.sideMenuWindow.x+2,i,windows.sideMenuWindow.width,1,0x777777)
-			end
-			i = i + 1
-		end
-		for i in pairs(squadMember.spells) do
-			buffer.text(windows.sideMenuWindow.x+2,i+12,0x000000,spells[squadMember.spells[i].num].name)
-			buffer.text((buffer.screen.width+1)-string.len(inventory[i].count),i+12,0x000000,squadMember.spells[i].count)
-		end
 	elseif selectedMenu == 5 then
 		-- меню умений
 		if inBattle then squadMember = squad[battle.partyMemberTurn]; end
